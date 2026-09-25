@@ -311,6 +311,7 @@
       const cls = pctClass(pct);
       return `<tr class="${cls}">
         <td>${e.hora}</td>
+        <td>${escapeHtml(e.peca||'—')}</td>
         <td>${escapeHtml(e.op||'—')}</td>
         <td>${e.meta}</td>
         <td>${e.produzido}</td>
@@ -336,10 +337,13 @@
         <div class="add-form">
           <div class="row">
             <select class="f-hora">${hourSlotsForTurno(turno).map(h=>`<option>${h}</option>`).join('')}</select>
-            <input type="text" class="f-op" placeholder="Nº da OP">
+            <input type="text" class="f-peca" placeholder="Nº da peça">
           </div>
           <div class="row">
+            <input type="text" class="f-op" placeholder="Nº da OP">
             <input type="number" min="0" class="f-meta" placeholder="Meta (peças/h)" value="${meta}">
+          </div>
+          <div class="row">
             <input type="number" min="0" class="f-produzido" placeholder="Produzido">
           </div>
           <div class="row">
@@ -352,7 +356,7 @@
           <button class="btn-add" data-machine="${machine}">+ Registrar hora</button>
         </div>
         ${list.length ? `<table>
-          <thead><tr><th>Hora</th><th>OP</th><th>Meta</th><th>Feito</th><th>%</th><th>Motivo</th><th></th></tr></thead>
+          <thead><tr><th>Hora</th><th>Peça</th><th>OP</th><th>Meta</th><th>Feito</th><th>%</th><th>Motivo</th><th></th></tr></thead>
           <tbody>${rows}</tbody>
         </table>` : `<div class="no-entries">Nenhum registro ainda neste turno/data.</div>`}
       </div>
@@ -393,6 +397,7 @@
         const card = btn.closest('.m-card');
         const machine = btn.dataset.machine;
         const hora = card.querySelector('.f-hora').value;
+        const peca = card.querySelector('.f-peca').value.trim();
         const op = card.querySelector('.f-op').value.trim();
         const meta = Number(card.querySelector('.f-meta').value)||0;
         const produzido = Number(card.querySelector('.f-produzido').value)||0;
@@ -400,7 +405,7 @@
         const obs = card.querySelector('.f-obs').value.trim();
         state.entries.push({
           id: 'e'+Date.now()+Math.random().toString(36).slice(2,6),
-          machine, turno, data, hora, op, meta, produzido, motivo, obs
+          machine, turno, data, hora, peca, op, meta, produzido, motivo, obs
         });
         // atualiza a meta padrão da máquina para a última usada, facilitando o próximo lançamento
         state.metas[machine] = meta;
@@ -447,7 +452,7 @@
         txt += `\n${e.machine}\n`;
       }
       const pct = e.meta>0 ? Math.round(e.produzido/e.meta*100) : 0;
-      txt += `${e.hora}${e.op?' [OP '+e.op+']':''}: ${e.produzido}/${e.meta} (${pct}%)`;
+      txt += `${e.hora}${e.peca?' [Peça '+e.peca+']':''}${e.op?' [OP '+e.op+']':''}: ${e.produzido}/${e.meta} (${pct}%)`;
       if(e.motivo) txt += ` — ${e.motivo}`;
       txt += `\n`;
     });
