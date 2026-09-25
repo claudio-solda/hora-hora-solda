@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Produção Hora a Hora — Solda</title>
+<meta name="theme-color" content="#1B1F22">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%231B1F22'/%3E%3Ctext x='50' y='68' font-size='54' text-anchor='middle' fill='%23D98E2B'%3E%E2%8F%B1%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%231B1F22'/%3E%3Ctext x='50' y='68' font-size='54' text-anchor='middle' fill='%23D98E2B'%3E%E2%8F%B1%3C/text%3E%3C/svg%3E">
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Produ%C3%A7%C3%A3o%20Hora%20a%20Hora%20-%20Solda%22%2C%22short_name%22%3A%22Hora%20a%20Hora%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%231B1F22%22%2C%22theme_color%22%3A%22%231B1F22%22%7D">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1B1F22; --panel:#23282C; --panel-2:#2B3136; --line:#383F44;
+    --ink:#ECE8E1; --ink-dim:#9AA3A8;
+    --steel:#5B8AA6; --amber:#D98E2B; --rust:#B5482F;
+    --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
+    box-sizing:border-box;
+  }
+  *{box-sizing:inherit;}
+  html,body{height:100%;}
+  html{scroll-padding-top:var(--safe-t);}
+  body{
+    margin:0;background:var(--bg);
+    background-image:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 28px),
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 28px);
+    color:var(--ink);font-family:'Inter',sans-serif;
+    padding-top:var(--safe-t);padding-bottom:var(--safe-b);
+    -webkit-tap-highlight-color:transparent;
+  }
+  .wrap{max-width:640px;margin:0 auto;padding:20px 16px 90px;}
+  header{padding:6px 2px 16px;border-bottom:1px solid var(--line);margin-bottom:16px;}
+  .eyebrow{font-family:'Barlow Condensed';font-weight:600;letter-spacing:0.04em;color:var(--amber);font-size:13px;margin:0 0 2px;}
+  h1{font-family:'Barlow Condensed';font-weight:700;font-size:28px;line-height:1.05;margin:0 0 6px;color:var(--ink);}
+  header p{margin:0;color:var(--ink-dim);font-size:13.5px;line-height:1.5;max-width:46ch;}
+
+  .bar{display:flex;gap:8px;margin:16px 0;align-items:center;flex-wrap:wrap;}
+  .turno-chips{display:flex;gap:6px;}
+  .chip{background:var(--panel);border:1px solid var(--line);color:var(--ink-dim);font-size:13px;padding:8px 13px;font-family:'Barlow Condensed';font-weight:600;}
+  .chip.active{border-color:var(--steel);color:var(--ink);background:var(--panel-2);}
+  input[type=date]{background:var(--panel);border:1px solid var(--line);color:var(--ink);padding:8px 10px;font-family:'Inter';font-size:13.5px;flex:1;min-width:140px;}
+
+  .turno-horario{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-dim);margin-bottom:14px;flex-wrap:wrap;}
+  .turno-horario input[type=time]{background:var(--panel);border:1px solid var(--line);color:var(--ink);padding:6px 8px;font-size:13px;font-family:'Inter';}
+
+  .search{width:100%;background:var(--panel);border:1px solid var(--line);color:var(--ink);padding:10px 12px;font-size:14px;margin-bottom:16px;font-family:'Inter';}
+  .search:focus{outline:2px solid var(--steel);outline-offset:-1px;}
+
+  .summary{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--amber);padding:12px 14px;margin-bottom:18px;}
+  .summary h2{font-family:'Barlow Condensed';font-size:16px;margin:0 0 8px;font-weight:600;}
+  .sum-row{display:flex;justify-content:space-between;font-size:13px;color:var(--ink-dim);padding:3px 0;}
+  .sum-row b{color:var(--ink);font-weight:600;}
+  .sum-bar{height:7px;background:var(--panel-2);margin-top:8px;position:relative;overflow:hidden;}
+  .sum-bar i{display:block;height:100%;background:var(--steel);}
+
+  .m-card{background:var(--panel);border:1px solid var(--line);margin-bottom:10px;}
+  .m-head{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;user-select:none;}
+  .m-head .dot{width:11px;height:11px;flex:0 0 auto;border-radius:50%;background:var(--line);}
+  .m-head .name{font-family:'Barlow Condensed';font-weight:600;font-size:16.5px;flex:1;}
+  .m-head .mini{font-size:12px;color:var(--ink-dim);}
+  .m-head .chev{color:var(--ink-dim);font-size:11px;transition:transform .15s;}
+  .m-card.open .chev{transform:rotate(180deg);}
+  .m-body{display:none;padding:0 14px 14px;}
+  .m-card.open .m-body{display:block;}
+
+  .meta-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:13px;color:var(--ink-dim);}
+  .meta-row input{width:70px;background:var(--panel-2);border:1px solid var(--line);color:var(--ink);padding:6px 8px;font-size:13.5px;}
+
+  .add-form{background:var(--panel-2);border:1px solid var(--line);padding:10px;margin-bottom:12px;}
+  .add-form .row{display:flex;gap:8px;margin-bottom:8px;}
+  .add-form select, .add-form input{background:var(--panel);border:1px solid var(--line);color:var(--ink);padding:7px 8px;font-size:13.5px;font-family:'Inter';flex:1;min-width:0;}
+  .add-form textarea{width:100%;background:var(--panel);border:1px solid var(--line);color:var(--ink);padding:7px 8px;font-size:13px;min-height:40px;margin-bottom:8px;font-family:'Inter';}
+  .add-form button{width:100%;background:var(--steel);color:#0E1B22;border:none;padding:9px;font-family:'Barlow Condensed';font-weight:700;font-size:14.5px;}
+
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  th{text-align:left;color:var(--ink-dim);font-weight:500;font-size:11px;padding:5px 6px;border-bottom:1px solid var(--line);}
+  td{padding:6px;border-bottom:1px solid var(--line);vertical-align:top;}
+  tr.ok td:first-child{box-shadow:inset 3px 0 0 var(--steel);}
+  tr.warn td:first-child{box-shadow:inset 3px 0 0 var(--amber);}
+  tr.bad td:first-child{box-shadow:inset 3px 0 0 var(--rust);}
+  td.pct{font-family:'Barlow Condensed';font-weight:700;}
+  .motivo-txt{color:var(--ink-dim);font-size:11.5px;}
+  .no-entries{color:var(--ink-dim);font-size:12.5px;padding:8px 2px;}
+  .row-actions{white-space:nowrap;}
+  .row-actions button{background:none;border:none;color:var(--rust);font-size:11px;text-decoration:underline;padding:2px;}
+
+  .copy-btn{width:100%;background:var(--amber);color:#20140A;border:none;font-family:'Barlow Condensed';font-weight:700;font-size:16px;padding:12px;margin:20px 0 6px;}
+  .copy-btn.copied{background:var(--steel);color:#0E1B22;}
+  footer{text-align:center;color:var(--ink-dim);font-size:11.5px;margin-top:20px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">Setor de Solda · NIKEN</p>
+    <h1>Produção Hora a Hora</h1>
+    <p>Acompanhamento de meta x produzido por máquina, hora a hora, com motivo quando não bate a meta.</p>
+  </header>
+
+  <div class="bar">
+    <div class="turno-chips" id="turno-chips"></div>
+    <input type="date" id="data-input">
+  </div>
+
+  <div class="turno-horario" id="turno-horario">
+    <span id="th-label">Horário do turno:</span>
+    <input type="time" id="th-inicio">
+    <span>até</span>
+    <input type="time" id="th-fim">
+  </div>
+  <div class="turno-horario" id="turno-almoco">
+    <span>Almoço (30 min) a partir de:</span>
+    <input type="time" id="ta-inicio">
+  </div>
+
+  <input type="text" class="search" id="search" placeholder="Buscar máquina (ex: MS007)">
+
+  <div class="summary">
+    <h2>Resumo do turno</h2>
+    <div class="sum-row"><span>Meta total</span><b id="sum-meta">0</b></div>
+    <div class="sum-row"><span>Produzido</span><b id="sum-prod">0</b></div>
+    <div class="sum-row"><span>Atingimento</span><b id="sum-pct">0%</b></div>
+    <div class="sum-bar"><i id="sum-bar-fill" style="width:0%"></i></div>
+  </div>
+
+  <div id="machines"></div>
+
+  <button class="copy-btn" id="copy-btn">Copiar resumo do turno</button>
+</div>
+
+<script>
+(function(){
+  const STORAGE_KEY = 'hora-hora-solda-v1';
+  const MACHINES = ['MS001','MS002','MS003','MS004','MS005','MS006','MS007','MS008','MS009','MS010',
+    'MS011','MS012','MS013','MS014','MS015','Robô','Rebitadeira','Montagem 1','Montagem 2'];
+  const MOTIVOS = ['Falta de embalagem','Espera eletrodo/ferramentaria','Quebra/manutenção de máquina',
+    'Falta de material/peça','Troca de operador','Setup/troca de peça','Retrabalho/qualidade',
+    'Falta de energia/ar comprimido','Outro'];
+
+  function hourSlots(){
+    const arr = [];
+    for(let h=0; h<24; h++){
+      const a = String(h).padStart(2,'0');
+      const b = String((h+1)%24).padStart(2,'0');
+      arr.push(a+'h–'+b+'h');
+    }
+    return arr;
+  }
+  function timeToMin(t){
+    const p = (t||'').split(':');
+    if(p.length<2) return null;
+    return Number(p[0])*60 + Number(p[1]);
+  }
+  function minToTime(m){
+    m = ((m%1440)+1440)%1440;
+    return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+  }
+  function hourSlotsForTurno(t){
+    const cfg = state.turnoHorarios[t];
+    const start = cfg ? timeToMin(cfg.inicio) : null;
+    let end = cfg ? timeToMin(cfg.fim) : null;
+    if(start===null || end===null) return hourSlots();
+    if(end <= start) end += 1440;
+
+    let segments = [[start, end]];
+    const alm = state.turnoAlmoco[t];
+    if(alm && alm.inicio){
+      let aStart = timeToMin(alm.inicio);
+      if(aStart < start) aStart += 1440;
+      const aEnd = aStart + (Number(alm.duracao)||30);
+      if(aStart < end && aEnd > start){
+        segments = [];
+        if(aStart > start) segments.push([start, Math.min(aStart, end)]);
+        if(aEnd < end) segments.push([Math.max(aEnd, start), end]);
+      }
+    }
+
+    const slots = [];
+    segments.forEach(([s,e]) => {
+      let cur = s;
+      while(cur < e){
+        const next = Math.min(cur+60, e);
+        slots.push(minToTime(cur)+'–'+minToTime(next));
+        cur = next;
+      }
+    });
+    return slots.length ? slots : hourSlots();
+  }
+
+  function todayStr(){
+    const d = new Date();
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  }
+
+  function loadState(){
+    const defaultHorarios = {'1':{inicio:'05:25',fim:'13:55'}, '2':{inicio:'',fim:''}, '3':{inicio:'',fim:''}};
+    const defaultAlmoco = {'1':{inicio:'11:00',duracao:30}, '2':{inicio:'',duracao:30}, '3':{inicio:'',duracao:30}};
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return {metas:{}, entries:[], turnoHorarios:defaultHorarios, turnoAlmoco:defaultAlmoco};
+      const s = JSON.parse(raw);
+      return {
+        metas: s.metas||{},
+        entries: s.entries||[],
+        turnoHorarios: s.turnoHorarios || defaultHorarios,
+        turnoAlmoco: s.turnoAlmoco || defaultAlmoco
+      };
+    }catch(e){ return {metas:{}, entries:[], turnoHorarios:defaultHorarios, turnoAlmoco:defaultAlmoco}; }
+  }
+  function saveState(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+  }
+
+  let state = loadState();
+  let turno = '1';
+  let data = todayStr();
+  let searchTerm = '';
+  let openMachine = null;
+
+  const $ = sel => document.querySelector(sel);
+
+  // turno chips
+  const turnoWrap = $('#turno-chips');
+  ['1','2','3'].forEach(t => {
+    const b = document.createElement('button');
+    b.className = 'chip' + (t===turno ? ' active' : '');
+    b.textContent = t+'º turno';
+    b.dataset.t = t;
+    b.addEventListener('click', () => { turno = t; fillTurnoHorario(); renderAll(); });
+    turnoWrap.appendChild(b);
+  });
+  $('#data-input').value = data;
+  $('#data-input').addEventListener('change', e => { data = e.target.value || todayStr(); renderAll(); });
+  $('#search').addEventListener('input', e => { searchTerm = e.target.value.toLowerCase(); renderMachines(); });
+
+  function fillTurnoHorario(){
+    const cfg = state.turnoHorarios[turno] || {inicio:'',fim:''};
+    $('#th-label').textContent = 'Horário do '+turno+'º turno:';
+    $('#th-inicio').value = cfg.inicio || '';
+    $('#th-fim').value = cfg.fim || '';
+    const alm = state.turnoAlmoco[turno] || {inicio:'',duracao:30};
+    $('#ta-inicio').value = alm.inicio || '';
+  }
+  function saveTurnoHorario(){
+    if(!state.turnoHorarios[turno]) state.turnoHorarios[turno] = {inicio:'',fim:''};
+    state.turnoHorarios[turno].inicio = $('#th-inicio').value;
+    state.turnoHorarios[turno].fim = $('#th-fim').value;
+    saveState();
+    renderMachines();
+  }
+  function saveTurnoAlmoco(){
+    if(!state.turnoAlmoco[turno]) state.turnoAlmoco[turno] = {inicio:'',duracao:30};
+    state.turnoAlmoco[turno].inicio = $('#ta-inicio').value;
+    saveState();
+    renderMachines();
+  }
+  $('#th-inicio').addEventListener('change', saveTurnoHorario);
+  $('#th-fim').addEventListener('change', saveTurnoHorario);
+  $('#ta-inicio').addEventListener('change', saveTurnoAlmoco);
+
+  function entriesFor(machine){
+    return state.entries
+      .filter(e => e.machine===machine && e.turno===turno && e.data===data)
+      .sort((a,b) => a.hora.localeCompare(b.hora));
+  }
+  function allTurnoEntries(){
+    return state.entries.filter(e => e.turno===turno && e.data===data);
+  }
+
+  function pctClass(pct){
+    if(pct >= 100) return 'ok';
+    if(pct >= 70) return 'warn';
+    return 'bad';
+  }
+
+  function renderSummary(){
+    const list = allTurnoEntries();
+    const metaTotal = list.reduce((s,e)=>s+Number(e.meta||0),0);
+    const prodTotal = list.reduce((s,e)=>s+Number(e.produzido||0),0);
+    const pct = metaTotal>0 ? Math.round(prodTotal/metaTotal*100) : 0;
+    $('#sum-meta').textContent = metaTotal;
+    $('#sum-prod').textContent = prodTotal;
+    $('#sum-pct').textContent = pct+'%';
+    $('#sum-bar-fill').style.width = Math.min(pct,100)+'%';
+    $('#sum-bar-fill').style.background = pct>=100?'var(--steel)':(pct>=70?'var(--amber)':'var(--rust)');
+  }
+
+  function machineStatus(machine){
+    const list = entriesFor(machine);
+    if(list.length===0) return {dot:'transparent', mini:'sem registro'};
+    const last = list[list.length-1];
+    const pct = last.meta>0 ? Math.round(last.produzido/last.meta*100) : 0;
+    const color = pct>=100?'var(--steel)':(pct>=70?'var(--amber)':'var(--rust)');
+    return {dot:color, mini: last.hora+' · '+pct+'%'};
+  }
+
+  function machineCardHtml(machine){
+    const meta = state.metas[machine] || '';
+    const st = machineStatus(machine);
+    const list = entriesFor(machine);
+    const isOpen = openMachine === machine;
+    const rows = list.map(e => {
+      const pct = e.meta>0 ? Math.round(e.produzido/e.meta*100) : 0;
+      const cls = pctClass(pct);
+      return `<tr class="${cls}">
+        <td>${e.hora}</td>
+        <td>${escapeHtml(e.op||'—')}</td>
+        <td>${e.meta}</td>
+        <td>${e.produzido}</td>
+        <td class="pct">${pct}%</td>
+        <td>${e.motivo ? `<div class="motivo-txt">${escapeHtml(e.motivo)}${e.obs?' — '+escapeHtml(e.obs):''}</div>` : ''}</td>
+        <td class="row-actions"><button data-del="${e.id}">excluir</button></td>
+      </tr>`;
+    }).join('');
+
+    return `
+    <div class="m-card ${isOpen?'open':''}" data-machine="${machine}">
+      <div class="m-head">
+        <span class="dot" style="background:${st.dot}"></span>
+        <span class="name">${machine}</span>
+        <span class="mini">${st.mini}</span>
+        <span class="chev">▾</span>
+      </div>
+      <div class="m-body">
+        <div class="meta-row">
+          Meta padrão desta máquina (pré-preenche o campo Meta):
+          <input type="number" min="0" class="meta-input" data-machine="${machine}" value="${meta}">
+        </div>
+        <div class="add-form">
+          <div class="row">
+            <select class="f-hora">${hourSlotsForTurno(turno).map(h=>`<option>${h}</option>`).join('')}</select>
+            <input type="text" class="f-op" placeholder="Nº da OP">
+          </div>
+          <div class="row">
+            <input type="number" min="0" class="f-meta" placeholder="Meta (peças/h)" value="${meta}">
+            <input type="number" min="0" class="f-produzido" placeholder="Produzido">
+          </div>
+          <div class="row">
+            <select class="f-motivo">
+              <option value="">Sem motivo (bateu a meta)</option>
+              ${MOTIVOS.map(m=>`<option>${m}</option>`).join('')}
+            </select>
+          </div>
+          <textarea class="f-obs" placeholder="Observação (opcional)"></textarea>
+          <button class="btn-add" data-machine="${machine}">+ Registrar hora</button>
+        </div>
+        ${list.length ? `<table>
+          <thead><tr><th>Hora</th><th>OP</th><th>Meta</th><th>Feito</th><th>%</th><th>Motivo</th><th></th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>` : `<div class="no-entries">Nenhum registro ainda neste turno/data.</div>`}
+      </div>
+    </div>`;
+  }
+
+  function escapeHtml(s){
+    return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function renderMachines(){
+    const list = MACHINES.filter(m => m.toLowerCase().includes(searchTerm));
+    const el = $('#machines');
+    if(list.length===0){
+      el.innerHTML = `<div class="no-entries">Nenhuma máquina encontrada.</div>`;
+      return;
+    }
+    el.innerHTML = list.map(machineCardHtml).join('');
+
+    el.querySelectorAll('.m-head').forEach(head => {
+      head.addEventListener('click', () => {
+        const m = head.parentElement.dataset.machine;
+        openMachine = (openMachine === m) ? null : m;
+        renderMachines();
+      });
+    });
+    el.querySelectorAll('.meta-input').forEach(inp => {
+      inp.addEventListener('click', e => e.stopPropagation());
+      inp.addEventListener('change', () => {
+        state.metas[inp.dataset.machine] = Number(inp.value)||0;
+        saveState();
+        renderMachines();
+      });
+    });
+    el.querySelectorAll('.btn-add').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const card = btn.closest('.m-card');
+        const machine = btn.dataset.machine;
+        const hora = card.querySelector('.f-hora').value;
+        const op = card.querySelector('.f-op').value.trim();
+        const meta = Number(card.querySelector('.f-meta').value)||0;
+        const produzido = Number(card.querySelector('.f-produzido').value)||0;
+        const motivo = card.querySelector('.f-motivo').value;
+        const obs = card.querySelector('.f-obs').value.trim();
+        state.entries.push({
+          id: 'e'+Date.now()+Math.random().toString(36).slice(2,6),
+          machine, turno, data, hora, op, meta, produzido, motivo, obs
+        });
+        // atualiza a meta padrão da máquina para a última usada, facilitando o próximo lançamento
+        state.metas[machine] = meta;
+        saveState();
+        renderAll();
+        openMachine = machine;
+        renderMachines();
+      });
+    });
+    el.querySelectorAll('[data-del]').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const id = btn.dataset.del;
+        state.entries = state.entries.filter(x => x.id !== id);
+        saveState();
+        renderAll();
+      });
+    });
+  }
+
+  function renderTurnoChips(){
+    turnoWrap.querySelectorAll('.chip').forEach(b => {
+      b.classList.toggle('active', b.dataset.t === turno);
+    });
+  }
+
+  function renderAll(){
+    renderTurnoChips();
+    renderSummary();
+    renderMachines();
+  }
+
+  $('#copy-btn').addEventListener('click', () => {
+    const list = allTurnoEntries().sort((a,b) => a.machine.localeCompare(b.machine) || a.hora.localeCompare(b.hora));
+    const metaTotal = list.reduce((s,e)=>s+Number(e.meta||0),0);
+    const prodTotal = list.reduce((s,e)=>s+Number(e.produzido||0),0);
+    const pctGeral = metaTotal>0 ? Math.round(prodTotal/metaTotal*100) : 0;
+    let txt = `Produção Hora a Hora — ${turno}º turno — ${data}\n`;
+    txt += `Meta: ${metaTotal} | Produzido: ${prodTotal} | Atingimento: ${pctGeral}%\n\n`;
+    let currentMachine = '';
+    list.forEach(e => {
+      if(e.machine !== currentMachine){
+        currentMachine = e.machine;
+        txt += `\n${e.machine}\n`;
+      }
+      const pct = e.meta>0 ? Math.round(e.produzido/e.meta*100) : 0;
+      txt += `${e.hora}${e.op?' [OP '+e.op+']':''}: ${e.produzido}/${e.meta} (${pct}%)`;
+      if(e.motivo) txt += ` — ${e.motivo}`;
+      txt += `\n`;
+    });
+    const btn = $('#copy-btn');
+    const done = () => {
+      btn.textContent = 'Resumo copiado!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copiar resumo do turno'; btn.classList.remove('copied'); }, 1800);
+    };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(done).catch(() => fallbackCopy(txt, done));
+    } else {
+      fallbackCopy(txt, done);
+    }
+  });
+  function fallbackCopy(txt, cb){
+    const ta = document.createElement('textarea');
+    ta.value = txt; document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); cb(); }catch(e){}
+    document.body.removeChild(ta);
+  }
+
+  renderAll();
+  fillTurnoHorario();
+})();
+</script>
+</body>
+</html>
